@@ -135,11 +135,11 @@ function App() {
                     </button>
                   </div>
 
-                  <button onClick={() => { setCurrency('COP'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'COP' && "text-primary-600 font-bold")}>Peso (COP)</button>
-                  <button onClick={() => { setCurrency('AUD'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'AUD' && "text-primary-600 font-bold")}>Dólar (AUD)</button>
-                  <button onClick={() => { setCurrency('USD'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'USD' && "text-primary-600 font-bold")}>Dólar (USD)</button>
+                  <button onClick={() => { setCurrency('COP'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'COP' && "text-primary-600 font-bold")}>Peso colombiano (COP)</button>
+                  <button onClick={() => { setCurrency('AUD'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'AUD' && "text-primary-600 font-bold")}>Dólar australiano (AUD)</button>
+                  <button onClick={() => { setCurrency('USD'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'USD' && "text-primary-600 font-bold")}>Dólar estadounidense (USD)</button>
                   <button onClick={() => { setCurrency('EUR'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'EUR' && "text-primary-600 font-bold")}>Euro (EUR)</button>
-                  <button onClick={() => { setCurrency('CAD'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'CAD' && "text-primary-600 font-bold")}>Dólar (CAD)</button>
+                  <button onClick={() => { setCurrency('CAD'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'CAD' && "text-primary-600 font-bold")}>Dólar canadiense (CAD)</button>
                 </div>
               )}
             </div>

@@ -2,19 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    color-scheme: light;
-  }
-  
-  body {
-    @apply bg-background text-foreground antialiased selection:bg-primary-500/20;
-    font-feature-settings: "rlig" 1, "calt" 1;
-  }
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  background-color: #FAEBDD;
+  /* Previene que el zoom del sistema desplace el contenido erróneamente */
+  overflow-x: hidden;
 }
 
-@layer utilities {
-  .glass {
-    @apply bg-zinc-900/60 backdrop-blur-xl border border-white/5;
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #FAEBDD;
+  overflow-x: hidden;
+  /* Mejora la estabilidad de gestos en móviles */
+  touch-action: pan-x pan-y;
+}
+
+#root {
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Evita que el resaltado azul al tocar interfiera con la captura */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Clase para que la gráfica no sea seleccionable (como ya tenías) */
+.chart-no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@layer base {
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
 }
