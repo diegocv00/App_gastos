@@ -34,7 +34,23 @@ export function formatCurrency(amount: number, currency: string): string {
     return `${symbol} ${formattedNumber} ${currency}`;
 }
 
-export function parseSafeISO(dateStr: string): Date {
+export function parseSafeISO(dateStr: string | null | undefined): Date {
+    if (!dateStr) return new Date();
+
+    // Si viene hora (T), nos quedamos solo con la parte de la fecha YYYY-MM-DD
+    if (dateStr.includes('T')) {
+        dateStr = dateStr.split('T')[0];
+    }
+
+    // Si la fecha viene en formato corto "YYYY-MM-DD" (10 caracteres)
+    if (dateStr.length === 10 && dateStr.includes('-')) {
+        const [year, month, day] = dateStr.split('-');
+        // Al usar Date(año, mes, día) con números separados, 
+        // forzamos a JavaScript a usar la zona horaria LOCAL, no UTC.
+        return new Date(Number(year), Number(month) - 1, Number(day));
+    }
+
+    // Fallback de seguridad si la fecha es inválida o tiene otro formato
     const date = new Date(dateStr);
     return isNaN(date.getTime()) ? new Date() : date;
 }

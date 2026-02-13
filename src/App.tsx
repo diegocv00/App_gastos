@@ -177,6 +177,7 @@ function App() {
               onViewModeChange={setViewMode}
               selectedCategory={selectedCategory}
               onCategoryChange={setSelectedCategory}
+              onClearDate={() => setSelectedDate(null)}
             />
           </>
         )}
