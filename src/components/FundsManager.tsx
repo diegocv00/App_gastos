@@ -67,7 +67,7 @@ export function FundsManager({
                 <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-2 opacity-80">
                         <Wallet className="w-4 h-4" />
-                        <span className="text-sm font-medium uppercase tracking-wider">Saldo Disponible</span>
+                        <span className="text-sm font-medium uppercase tracking-wider">Saldo disponible</span>
                     </div>
                     <h2 className="text-4xl font-bold mb-6 tracking-tight">
                         {formatCurrency(currentBalance, currency)}

@@ -11,7 +11,8 @@ import { useContacts } from './hooks/useContacts';
 import { useAuth } from './hooks/useAuth';
 import { useFunds } from './hooks/useFunds';
 import { FundsManager } from './components/FundsManager';
-import { ReceiptText, History, Users, LogOut, Wallet, Bell, Settings as SettingsIcon } from 'lucide-react';
+// 1. AÑADIMOS LA IMPORTACIÓN DE 'X' AQUÍ:
+import { ReceiptText, History, Users, LogOut, Wallet, Bell, Settings as SettingsIcon, X } from 'lucide-react';
 import { cn } from './lib/utils';
 import { useSettings } from './contexts/SettingsContext';
 import { supabase } from './lib/supabase';
@@ -26,8 +27,6 @@ function App() {
   const { expenses, addExpense, updateExpense, deleteExpense } = useExpenses(user?.id);
   const { funds, totalFunds, addFunds, deleteFund, updateFund } = useFunds(user?.id);
   const { unreadCount, refresh: refreshNotifications } = useNotifications(user?.id);
-
-
 
   // Estados UI
   const [activeTab, setActiveTab] = useState<'add' | 'history' | 'contacts' | 'funds'>('add');
@@ -68,18 +67,14 @@ function App() {
   const convertedTransactions = transactions.map(t => ({ ...t, amount: convertFromBase(t.amount) })) as Expense[];
 
   // --- LÓGICA DE ANUNCIOS (NUEVO ENFOQUE) ---
-
-  // 1. AÑADIR GASTO -> SIEMPRE ANUNCIO
   const handleAddExpenseWithAd = async (expense: any) => {
     await addExpense(expense);
   };
 
-  // 2. AÑADIR FONDO -> SIEMPRE ANUNCIO
   const handleAddFundsWithAd = async (amount: number, description?: string) => {
     await addFunds(amount, description);
   };
 
-  // 3. BORRAR -> SIN ANUNCIO (Limpiado)
   const handleDeleteTransaction = async (id: string) => {
     const transaction = transactions.find(t => t.id === id);
     if (!transaction) return;
@@ -89,16 +84,13 @@ function App() {
     } else {
       await deleteExpense(id);
     }
-    // AQUÍ YA NO HAY showInterstitial()
   };
 
-  // 4. CONTACTOS -> SIN ANUNCIO (Limpiado)
   const handleRequestContactNoAd = async (friendId: string, name: string) => {
     const success = await requestContact(friendId, name);
     return success;
   };
 
-  // Editar -> Sin anuncio (Note: the hooks actually show ads now)
   const handleUpdateTransaction = async (id: string, updates: any) => {
     const transaction = transactions.find(t => t.id === id);
     if (!transaction) return;
@@ -124,21 +116,30 @@ function App() {
               {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />}
             </button>
 
+            {/* SECCIÓN DE CONFIGURACIÓN MODIFICADA */}
             <div className="relative">
               <button onClick={() => setShowSettings(!showSettings)} className="p-2 text-slate-400">
                 <SettingsIcon className="w-6 h-6" />
               </button>
               {showSettings && (
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in zoom-in-95 origin-top-right">
-                  <div className="px-4 py-2 border-b border-slate-100 mb-1">
+
+                  {/* 2. MODIFICAMOS ESTE DIV PARA INCLUIR EL BOTÓN DE CERRAR */}
+                  <div className="px-4 py-2 border-b border-slate-100 mb-1 flex justify-between items-center">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Moneda</p>
+                    <button
+                      onClick={() => setShowSettings(false)}
+                      className="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-full transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
+
                   <button onClick={() => { setCurrency('COP'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'COP' && "text-primary-600 font-bold")}>Peso (COP)</button>
                   <button onClick={() => { setCurrency('AUD'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'AUD' && "text-primary-600 font-bold")}>Dólar (AUD)</button>
                   <button onClick={() => { setCurrency('USD'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'USD' && "text-primary-600 font-bold")}>Dólar (USD)</button>
                   <button onClick={() => { setCurrency('EUR'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'EUR' && "text-primary-600 font-bold")}>Euro (EUR)</button>
                   <button onClick={() => { setCurrency('CAD'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'CAD' && "text-primary-600 font-bold")}>Dólar (CAD)</button>
-
                 </div>
               )}
             </div>
@@ -170,7 +171,7 @@ function App() {
               contacts={contacts}
               userId={user.id}
               selectedDate={selectedDate}
-              onDelete={handleDeleteTransaction} // SIN ANUNCIO
+              onDelete={handleDeleteTransaction}
               onUpdate={handleUpdateTransaction}
               viewMode={viewMode}
               onViewModeChange={setViewMode}
@@ -187,7 +188,7 @@ function App() {
             onAddContact={addContact}
             onDeleteContact={deleteContact}
             onSearchCode={searchContactByCode}
-            onRequestContact={handleRequestContactNoAd} // SIN ANUNCIO
+            onRequestContact={handleRequestContactNoAd}
             onUpdateContactName={updateContactName}
             myFriendCode={myProfile?.friend_code}
           />

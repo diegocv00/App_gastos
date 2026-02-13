@@ -1,4 +1,4 @@
-const colors = require('tailwindcss/colors');
+import plugin from 'tailwindcss/plugin'; // 1. Importar plugin
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -6,24 +6,23 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Map slate (used for neutrals) to warm rusty oranges/browns
         slate: {
-          50: '#fff7ed',  // orange-50
-          100: '#ffedd5', // orange-100
-          200: '#fed7aa', // orange-200
-          300: '#fdba74', // orange-300
-          400: '#fb923c', // orange-400
-          500: '#f97316', // orange-500
-          600: '#ea580c', // orange-600
-          700: '#c2410c', // orange-700
-          800: '#9a3412', // orange-800
-          900: '#7c2d12', // orange-900 (Text Secondary)
-          950: '#431407', // orange-950 (Text Primary)
+          50: '#fff7ed',
+          100: '#ffedd5',
+          200: '#fed7aa',
+          300: '#fdba74',
+          400: '#fb923c',
+          500: '#f97316',
+          600: '#ea580c',
+          700: '#c2410c',
+          800: '#9a3412',
+          900: '#7c2d12',
+          950: '#431407',
         },
         background: "#FAEBDD",
         foreground: "#431407",
         primary: {
-          50: '#fff7ed',
+          50: '#fbce97ff',
           100: '#FAEBDD',
           200: '#fed7aa',
           300: '#FAD289',
@@ -36,9 +35,9 @@ export default {
           950: '#431407',
           DEFAULT: "#FBC38A",
         },
-        card: "#fff7ed", // orange-50 (Very light cream)
+        card: "#fff7ed",
         "card-foreground": "#431407",
-        border: "#fed7aa", // orange-200
+        border: "#fed7aa",
         input: "#fed7aa",
         ring: "#FBC38A",
       },
@@ -48,5 +47,21 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // 2. Agregar el plugin aquí
+    plugin(function ({ addUtilities }) {
+      addUtilities({
+        '.chart-no-select': {
+          userSelect: 'none',
+          '& .recharts-wrapper': { outline: 'none !important' },
+          '& .recharts-surface': { outline: 'none !important' },
+          '& text': {
+            userSelect: 'none !important',
+            pointerEvents: 'none'
+          },
+          '& *:focus': { outline: 'none !important' },
+        }
+      })
+    })
+  ],
 };

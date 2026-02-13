@@ -11,7 +11,7 @@ interface ExpenseChartProps {
     expenses: Expense[];
     selectedDate: string | null;
     onSelectDate: (date: string) => void;
-    viewMode?: 'daily' | 'monthly'; // Optional to avoid breaking if not passed yet
+    viewMode?: 'daily' | 'monthly';
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -36,7 +36,7 @@ const CustomTooltip = ({ active, payload, label, currency }: any) => {
                     {Object.entries(categories).map(([cat, amount]) => (
                         <div key={cat} className="flex justify-between text-xs">
                             <span className="capitalize text-slate-700">{CATEGORY_LABELS[cat] || cat}</span>
-                            <span className={cn("font-mono", cat === 'Ingreso' ? "text-emerald-600" : "text-primary-600")}>
+                            <span className={cn("font-mono", cat === 'Ingreso' ? "text-emerald-600" : "text-primary-700")}>
                                 {cat === 'Ingreso' ? '+' : '-'}{formatCurrency(amount, currency)}
                             </span>
                         </div>
@@ -54,7 +54,7 @@ const CustomTooltip = ({ active, payload, label, currency }: any) => {
 
 export function ExpenseChart({ expenses, selectedDate, onSelectDate, viewMode = 'daily' }: ExpenseChartProps) {
     const { currency } = useSettings();
-    const [offset, setOffset] = useState(0); // Weeks or Months offset
+    const [offset, setOffset] = useState(0);
 
     const { data, dateRangeLabel } = useMemo(() => {
         const today = new Date();
@@ -64,7 +64,6 @@ export function ExpenseChart({ expenses, selectedDate, onSelectDate, viewMode = 
             const end = subWeeks(today, offset);
             const start = subDays(end, 6);
             const interval = eachDayOfInterval({ start, end });
-
             const startStr = format(start, 'd MMM', { locale: es });
             const endStr = format(end, 'd MMM', { locale: es });
 
@@ -75,19 +74,15 @@ export function ExpenseChart({ expenses, selectedDate, onSelectDate, viewMode = 
                     const dayItems = expenses.filter(e => isSameDay(parseSafeISO(e.date), date));
                     const expenseTotal = dayItems.filter(e => (e as any).type !== 'income').reduce((acc, curr) => acc + curr.amount, 0);
                     const incomeTotal = dayItems.filter(e => (e as any).type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
-
                     const categories = dayItems.reduce((acc, curr) => {
                         acc[curr.category] = (acc[curr.category] || 0) + curr.amount;
                         return acc;
                     }, {} as Record<string, number>);
-
-                    // Capitalize day name (lun -> Lun)
                     const dayName = format(date, 'EEE', { locale: es });
-                    const capitalizedDay = cap(dayName);
 
                     return {
                         date: dateStr,
-                        day: capitalizedDay,
+                        day: cap(dayName),
                         fullDate: format(date, 'd \'de\' MMMM', { locale: es }),
                         amount: expenseTotal,
                         income: incomeTotal,
@@ -96,11 +91,9 @@ export function ExpenseChart({ expenses, selectedDate, onSelectDate, viewMode = 
                 })
             };
         } else {
-            // Monthly Mode (Show last 6 months window)
             const end = subMonths(today, offset * 6);
             const start = subMonths(end, 5);
             const interval = eachMonthOfInterval({ start, end });
-
             const startStr = format(start, 'MMM yyyy', { locale: es });
             const endStr = format(end, 'MMM yyyy', { locale: es });
 
@@ -108,22 +101,18 @@ export function ExpenseChart({ expenses, selectedDate, onSelectDate, viewMode = 
                 dateRangeLabel: `${cap(startStr)} - ${cap(endStr)}`,
                 data: interval.map(date => {
                     const monthKey = format(date, 'yyyy-MM');
-                    // Filter transactions in this month
                     const monthItems = expenses.filter(e => e.date.startsWith(monthKey));
                     const expenseTotal = monthItems.filter(e => (e as any).type !== 'income').reduce((acc, curr) => acc + curr.amount, 0);
                     const incomeTotal = monthItems.filter(e => (e as any).type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
-
                     const categories = monthItems.reduce((acc, curr) => {
                         acc[curr.category] = (acc[curr.category] || 0) + curr.amount;
                         return acc;
                     }, {} as Record<string, number>);
-
                     const monthName = format(date, 'MMM', { locale: es });
-                    const capitalizedMonth = cap(monthName);
 
                     return {
-                        date: monthKey, // "2024-01"
-                        day: capitalizedMonth, // "Ene"
+                        date: monthKey,
+                        day: cap(monthName),
                         fullDate: format(date, 'MMMM yyyy', { locale: es }),
                         amount: expenseTotal,
                         income: incomeTotal,
@@ -135,7 +124,9 @@ export function ExpenseChart({ expenses, selectedDate, onSelectDate, viewMode = 
     }, [expenses, offset, viewMode]);
 
     return (
-        <div className="w-full mt-4 mb-6 space-y-4">
+        // Agregamos la clase 'chart-no-select' aquí
+        <div className="w-full mt-4 mb-6 space-y-4 chart-no-select">
+
             <div className="flex items-center justify-between px-2">
                 <button
                     onClick={() => setOffset(prev => prev + 1)}
@@ -155,9 +146,14 @@ export function ExpenseChart({ expenses, selectedDate, onSelectDate, viewMode = 
                 </button>
             </div>
 
-            <div className="h-56 w-full">
+            <div
+                className="h-56 w-full cursor-default"
+                style={{ WebkitTapHighlightColor: 'transparent' }}
+            >
                 <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={data} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}
+                    <BarChart
+                        data={data}
+                        margin={{ top: 10, right: 0, left: -20, bottom: 0 }}
                         onClick={(state: any) => {
                             if (state && state.activePayload && state.activePayload[0]) {
                                 onSelectDate(state.activePayload[0].payload.date);
@@ -168,7 +164,7 @@ export function ExpenseChart({ expenses, selectedDate, onSelectDate, viewMode = 
                             dataKey="day"
                             axisLine={false}
                             tickLine={false}
-                            tick={{ fill: '#78350f', fontSize: 10 }}
+                            tick={{ fill: '#7c2d12', fontSize: 10 }} // Usando tu color slate-900
                             dy={10}
                         />
                         <Tooltip
@@ -188,7 +184,7 @@ export function ExpenseChart({ expenses, selectedDate, onSelectDate, viewMode = 
                             {data.map((entry, index) => (
                                 <Cell
                                     key={`cell-expense-${index}`}
-                                    fill={entry.date === selectedDate ? '#FBC38A' : '#fed7aa'}
+                                    fill={entry.date === selectedDate ? '#FBC38A' : '#fed7aa'} // Usando tus colores primary
                                     className="transition-all duration-300 hover:opacity-100 cursor-pointer"
                                 />
                             ))}
