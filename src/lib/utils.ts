@@ -37,11 +37,6 @@ export function formatCurrency(amount: number, currency: string): string {
 export function parseSafeISO(dateStr: string | null | undefined): Date {
     if (!dateStr) return new Date();
 
-    // Si viene hora (T), nos quedamos solo con la parte de la fecha YYYY-MM-DD
-    if (dateStr.includes('T')) {
-        dateStr = dateStr.split('T')[0];
-    }
-
     // Si la fecha viene en formato corto "YYYY-MM-DD" (10 caracteres)
     if (dateStr.length === 10 && dateStr.includes('-')) {
         const [year, month, day] = dateStr.split('-');
@@ -50,7 +45,9 @@ export function parseSafeISO(dateStr: string | null | undefined): Date {
         return new Date(Number(year), Number(month) - 1, Number(day));
     }
 
-    // Fallback de seguridad si la fecha es inválida o tiene otro formato
+    // Si es un formato ISO completo con hora (ej. de Supabase: "2026-02-13T14:30:00Z")
     const date = new Date(dateStr);
+
+    // Fallback de seguridad si la fecha es inválida
     return isNaN(date.getTime()) ? new Date() : date;
 }

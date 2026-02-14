@@ -22,7 +22,7 @@ const CATEGORIES = [
 
 export function ExpenseEditModal({ expense, onSave, onClose }: ExpenseEditModalProps) {
     const { currency, convertToBase } = useSettings();
-    const [date, setDate] = useState(expense.date);
+    const [date, setDate] = useState(expense.date ? expense.date.substring(0, 10) : '');
     const localeMapping: Record<string, string> = {
         'COP': 'es-CO',
         'AUD': 'en-AU',

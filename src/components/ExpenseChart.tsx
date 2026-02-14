@@ -24,22 +24,13 @@ const CATEGORY_LABELS: Record<string, string> = {
     Ingreso: 'Fondo/Ingreso',
 };
 
-const CustomTooltip = ({ active, payload, label, currency, onClose }: any) => {
+const CustomTooltip = ({ active, payload, label, currency }: any) => {
     if (active && payload && payload.length) {
         const data = payload[0].payload;
         const categories = data.categories as Record<string, number>;
 
         return (
-            <div className="bg-white border border-slate-200 p-3 rounded-xl shadow-xl min-w-[200px] relative">
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onClose?.();
-                    }}
-                    className="absolute -top-2 -right-2 bg-white text-slate-400 hover:text-red-500 rounded-full p-1 shadow-md border border-slate-100 z-50 pointer-events-auto"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 18 18" /></svg>
-                </button>
+            <div className="bg-white border border-slate-200 p-3 rounded-xl shadow-xl min-w-[200px]">
                 <p className="text-slate-900 text-xs mb-2 font-medium uppercase tracking-wider">{label}</p>
                 <div className="space-y-1">
                     {Object.entries(categories).map(([cat, amount]) => (
@@ -177,9 +168,8 @@ export function ExpenseChart({ expenses, selectedDate, onSelectDate, viewMode = 
                             dy={10}
                         />
                         <Tooltip
-                            content={<CustomTooltip currency={currency} onClose={() => (onSelectDate as any)(null)} />}
+                            content={<CustomTooltip currency={currency} />}
                             cursor={{ fill: 'rgba(251, 195, 138, 0.2)' }}
-                            wrapperStyle={{ pointerEvents: 'auto' }}
                         />
                         <Bar dataKey="income" radius={[6, 6, 0, 0]} maxBarSize={20} stackId="a">
                             {data.map((entry, index) => (

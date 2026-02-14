@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
 import { MobileLayout } from './components/layout/MobileLayout';
 import { ExpenseForm } from './components/ExpenseForm';
 import { HistoryList } from './components/HistoryList';
@@ -52,12 +53,16 @@ function App() {
 
   // --- LISTA UNIFICADA ---
   const transactions = [
-    ...expenses.map(e => ({ ...e, type: 'expense' as const })),
+    ...expenses.map(e => ({
+      ...e,
+      date: e.date.substring(0, 10), // Asegurar formato YYYY-MM-DD
+      type: 'expense' as const
+    })),
     ...(funds || []).map(f => ({
       id: f.id,
       amount: f.amount,
       category: 'Ingreso',
-      date: f.created_at,
+      date: f.created_at ? f.created_at.substring(0, 10) : new Date().toISOString().substring(0, 10), // Use substring to avoid TZ shift
       description: f.description || 'Ingreso',
       type: 'income' as const,
       user_id: f.user_id
@@ -65,6 +70,8 @@ function App() {
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const convertedTransactions = transactions.map(t => ({ ...t, amount: convertFromBase(t.amount) })) as Expense[];
+
+  const handleClearDate = () => setSelectedDate(null);
 
   // --- LÓGICA DE ANUNCIOS (NUEVO ENFOQUE) ---
   const handleAddExpenseWithAd = async (expense: any) => {
@@ -177,7 +184,7 @@ function App() {
               onViewModeChange={setViewMode}
               selectedCategory={selectedCategory}
               onCategoryChange={setSelectedCategory}
-              onClearDate={() => setSelectedDate(null)}
+              onClearDate={handleClearDate}
             />
           </>
         )}
