@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { format } from 'date-fns';
 import { MobileLayout } from './components/layout/MobileLayout';
 import { ExpenseForm } from './components/ExpenseForm';
 import { HistoryList } from './components/HistoryList';
