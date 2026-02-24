@@ -5,7 +5,7 @@ import { format, subDays, eachDayOfInterval, subWeeks, isSameDay, subMonths, eac
 import { formatCurrency, cn, parseSafeISO } from '../lib/utils';
 import { useSettings } from '../contexts/SettingsContext';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { dateFormats, dateLocales } from '../lib/i18n';
+import { dateFormats, dateLocales } from '../lib/options';
 
 interface ExpenseChartProps {
     expenses: Expense[];

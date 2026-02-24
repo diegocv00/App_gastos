@@ -7,7 +7,7 @@ import { useSettings } from '../contexts/SettingsContext';
 import { ShoppingBag, Coffee, Car, Receipt, Music, CircleDollarSign, CalendarDays, Calendar, Edit2, Trash2, Wallet, X } from 'lucide-react';
 import { ExpenseEditModal } from './ExpenseEditModal';
 import { ConfirmModal } from './ConfirmModal';
-import { dateFormats, dateLocales } from '../lib/i18n';
+import { dateFormats, dateLocales } from '../lib/options';
 
 interface HistoryListProps {
     expenses: Expense[];

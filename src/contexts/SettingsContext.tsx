@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { DEFAULT_LANGUAGE, type Language, type TranslationKey, translations } from '../lib/i18n';
+import { DEFAULT_LANGUAGE, type Language, type TranslationKey, translations } from '../lib/options';
 
 type Currency = 'COP' | 'AUD' | 'USD' | 'EUR' | 'CAD';
 

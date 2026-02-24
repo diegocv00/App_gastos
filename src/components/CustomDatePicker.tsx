@@ -14,7 +14,7 @@ import {
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import { cn, parseSafeISO } from '../lib/utils';
 import { useSettings } from '../contexts/SettingsContext';
-import { dateFormats, dateLocales, monthsShort, weekDaysShort } from '../lib/i18n';
+import { dateFormats, dateLocales, monthsShort, weekDaysShort } from '../lib/options';
 
 interface CustomDatePickerProps {
     value: string; // yyyy-MM-dd
