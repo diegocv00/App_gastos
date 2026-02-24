@@ -11,9 +11,10 @@ import {
     isSameMonth,
     isSameDay
 } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import { cn, parseSafeISO } from '../lib/utils';
+import { useSettings } from '../contexts/SettingsContext';
+import { dateFormats, dateLocales, monthsShort, weekDaysShort } from '../lib/i18n';
 
 interface CustomDatePickerProps {
     value: string; // yyyy-MM-dd
@@ -22,9 +23,12 @@ interface CustomDatePickerProps {
 }
 
 export function CustomDatePicker({ value, onChange, label }: CustomDatePickerProps) {
+    const { language, t } = useSettings();
     const [isOpen, setIsOpen] = useState(false);
     const [view, setView] = useState<'days' | 'months' | 'years'>('days');
     const [currentMonth, setCurrentMonth] = useState(value ? parseSafeISO(value) : new Date());
+    const locale = dateLocales[language];
+    const formats = dateFormats[language];
 
     const selectedDate = useMemo(() => value ? parseSafeISO(value) : new Date(), [value]);
 
@@ -34,8 +38,8 @@ export function CustomDatePicker({ value, onChange, label }: CustomDatePickerPro
         return eachDayOfInterval({ start, end });
     }, [currentMonth]);
 
-    const weekDays = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
-    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const weekDays = weekDaysShort[language];
+    const months = monthsShort[language];
 
     const years = useMemo(() => {
         const currentYear = new Date().getFullYear();
@@ -75,7 +79,7 @@ export function CustomDatePicker({ value, onChange, label }: CustomDatePickerPro
                     onClick={openPicker}
                     className="w-full bg-white border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-xs text-slate-900 text-left focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all shadow-sm flex items-center gap-2"
                 >
-                    {format(selectedDate, "d 'de' MMMM, yyyy", { locale: es })}
+                    {format(selectedDate, formats.fullDate, { locale })}
                 </button>
             </div>
 
@@ -94,7 +98,7 @@ export function CustomDatePicker({ value, onChange, label }: CustomDatePickerPro
                                     onClick={() => setView(view === 'months' ? 'days' : 'months')}
                                     className="text-lg font-bold text-slate-900 capitalize hover:bg-slate-50 px-2 py-1 rounded-lg transition-colors whitespace-nowrap"
                                 >
-                                    {format(currentMonth, 'MMMM', { locale: es })}
+                                    {format(currentMonth, 'MMMM', { locale })}
                                 </button>
                                 <button
                                     type="button"
@@ -207,7 +211,7 @@ export function CustomDatePicker({ value, onChange, label }: CustomDatePickerPro
                             onClick={() => setIsOpen(false)}
                             className="mt-6 w-full py-3 bg-slate-50 text-slate-600 font-bold rounded-2xl hover:bg-slate-100 transition-colors uppercase text-[10px] tracking-wider"
                         >
-                            Cerrar
+                            {t('datePicker.close')}
                         </button>
                     </div>
                 </>

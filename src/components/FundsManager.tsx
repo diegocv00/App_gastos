@@ -16,7 +16,7 @@ export function FundsManager({
     totalExpenses,
     onAddFunds
 }: FundsManagerProps) {
-    const { currency, convertToBase } = useSettings();
+    const { currency, convertToBase, t } = useSettings();
     const [amount, setAmount] = useState('');
     const [description, setDescription] = useState('');
     const [isAdding, setIsAdding] = useState(false);
@@ -67,7 +67,7 @@ export function FundsManager({
                 <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-2 opacity-80">
                         <Wallet className="w-4 h-4" />
-                        <span className="text-sm font-medium uppercase tracking-wider">Saldo disponible</span>
+                        <span className="text-sm font-medium uppercase tracking-wider">{t('funds.availableBalance')}</span>
                     </div>
                     <h2 className="text-4xl font-bold mb-6 tracking-tight">
                         {formatCurrency(currentBalance, currency)}
@@ -75,11 +75,11 @@ export function FundsManager({
 
                     <div className="grid grid-cols-2 gap-4 border-t border-white/20 pt-6">
                         <div>
-                            <p className="text-[10px] uppercase tracking-widest opacity-70 mb-1">Total Ingresado</p>
+                            <p className="text-[10px] uppercase tracking-widest opacity-70 mb-1">{t('funds.totalAdded')}</p>
                             <p className="text-lg font-semibold">{formatCurrency(totalFunds, currency)}</p>
                         </div>
                         <div>
-                            <p className="text-[10px] uppercase tracking-widest opacity-70 mb-1">Total Gastado</p>
+                            <p className="text-[10px] uppercase tracking-widest opacity-70 mb-1">{t('funds.totalSpent')}</p>
                             <p className="text-lg font-semibold">{formatCurrency(totalExpenses, currency)}</p>
                         </div>
                     </div>
@@ -95,8 +95,8 @@ export function FundsManager({
                 <div className="bg-red-50 border border-red-100 p-4 rounded-2xl flex items-start gap-3 animate-pulse">
                     <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
                     <div>
-                        <p className="text-sm font-bold text-red-800">Saldo insuficiente</p>
-                        <p className="text-xs text-red-600">Has gastado más de lo que tienes ingresado.</p>
+                        <p className="text-sm font-bold text-red-800">{t('funds.insufficientBalanceTitle')}</p>
+                        <p className="text-xs text-red-600">{t('funds.insufficientBalanceMessage')}</p>
                     </div>
                 </div>
             )}
@@ -109,19 +109,19 @@ export function FundsManager({
                         className="w-full py-4 bg-white border border-slate-200 rounded-2xl flex items-center justify-center gap-3 text-slate-700 font-semibold hover:bg-slate-50 transition-all active:scale-95 shadow-sm"
                     >
                         <ArrowUpCircle className="w-5 h-5 text-primary-500" />
-                        Añadir dinero a fondos
+                        {t('funds.addFunds')}
                     </button>
                 ) : (
                     <form onSubmit={handleSubmit} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl animate-in zoom-in-95 duration-200">
                         <div className="space-y-4">
                             <div className="flex justify-between items-center">
-                                <h3 className="font-bold text-slate-900">Ingresar Monto</h3>
+                                <h3 className="font-bold text-slate-900">{t('funds.enterAmount')}</h3>
                                 <button
                                     type="button"
                                     onClick={() => setIsAdding(false)}
                                     className="text-xs text-slate-400 hover:text-slate-600"
                                 >
-                                    Cancelar
+                                    {t('common.cancel')}
                                 </button>
                             </div>
                             <div className="relative">
@@ -140,13 +140,13 @@ export function FundsManager({
                             </div>
                             <div className="space-y-2">
                                 <label className="text-xs font-medium text-slate-500 uppercase tracking-wider pl-1">
-                                    Nota / Descripción
+                                    {t('funds.noteLabel')}
                                 </label>
                                 <input
                                     type="text"
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
-                                    placeholder="¿De dónde es el dinero?"
+                                    placeholder={t('funds.notePlaceholder')}
                                     className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all"
                                 />
                             </div>
@@ -155,7 +155,7 @@ export function FundsManager({
                                 className="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-2xl shadow-lg shadow-primary-900/20 transition-all active:scale-95 flex items-center justify-center gap-2"
                             >
                                 <Plus className="w-5 h-5" />
-                                Confirmar ingreso
+                                {t('funds.confirmIncome')}
                             </button>
                         </div>
                     </form>
@@ -168,10 +168,10 @@ export function FundsManager({
                     <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center">
                         <TrendingUp className="w-5 h-5 text-primary-600" />
                     </div>
-                    <p className="text-sm font-semibold text-slate-900">¿Cómo funcionan los fondos?</p>
+                    <p className="text-sm font-semibold text-slate-900">{t('funds.howItWorksTitle')}</p>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                    Añade el dinero que tienes disponible (sueldo, ahorros, etc.). Cada vez que registres un gasto, se restará automáticamente de este saldo para que sepas exactamente cuánto te queda.
+                    {t('funds.howItWorksBody')}
                 </p>
             </div>
         </div>

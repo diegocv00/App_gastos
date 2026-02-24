@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAdMob } from './useAdMob';
+import { useSettings } from '../contexts/SettingsContext';
 
 export interface Contact {
     id: string;
@@ -14,6 +15,7 @@ export interface Contact {
 export function useContacts(userId: string | undefined) {
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [loading, setLoading] = useState(true);
+    const { t } = useSettings();
 
     const fetchContacts = async () => {
         if (!userId) {
@@ -44,15 +46,15 @@ export function useContacts(userId: string | undefined) {
 
     // Buscar Usuario (Paso 1)
     const searchContactByCode = async (friendCode: string) => {
-        if (!userId) throw new Error('No autenticado');
+        if (!userId) throw new Error(t('errors.notAuthenticated'));
         const { data: profile, error } = await supabase
             .from('profiles')
             .select('id, full_name, email')
             .eq('friend_code', friendCode.toUpperCase())
             .single();
 
-        if (error || !profile) throw new Error('Código no encontrado');
-        if (profile.id === userId) throw new Error('No puedes añadirte a ti mismo');
+        if (error || !profile) throw new Error(t('errors.codeNotFound'));
+        if (profile.id === userId) throw new Error(t('errors.cannotAddSelf'));
 
         // Verificar existencia
         const { data: existing } = await supabase
@@ -61,7 +63,7 @@ export function useContacts(userId: string | undefined) {
             .eq('user_id', userId)
             .eq('friend_id', profile.id)
             .single();
-        if (existing) throw new Error('Ya tienes a este usuario en tus contactos');
+        if (existing) throw new Error(t('errors.alreadyInContacts'));
 
         return profile;
     };
@@ -84,7 +86,7 @@ export function useContacts(userId: string | undefined) {
             showInterstitial();
             return true;
         } catch (error: any) {
-            alert('❌ Error: ' + error.message);
+            alert(`${t('errors.genericError')}: ${error.message}`);
             return false;
         }
     };
@@ -104,7 +106,7 @@ export function useContacts(userId: string | undefined) {
             if (error) throw error;
             return true;
         } catch (error: any) {
-            alert('❌ Error al actualizar: ' + error.message);
+            alert(`${t('errors.updateFailed')}: ${error.message}`);
             fetchContacts(); // Revertir si falla
             return false;
         }

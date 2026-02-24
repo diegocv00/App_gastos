@@ -1,4 +1,5 @@
 import { AlertTriangle } from 'lucide-react';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface ConfirmModalProps {
     isOpen: boolean;
@@ -16,10 +17,12 @@ export function ConfirmModal({
     onConfirm,
     title,
     message,
-    confirmText = "Eliminar",
+    confirmText,
     type = 'danger'
 }: ConfirmModalProps) {
+    const { t } = useSettings();
     if (!isOpen) return null;
+    const confirmLabel = confirmText || t('common.delete');
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
@@ -47,13 +50,13 @@ export function ConfirmModal({
                                 : 'bg-amber-600 text-white hover:bg-amber-700'
                                 }`}
                         >
-                            {confirmText}
+                            {confirmLabel}
                         </button>
                         <button
                             onClick={onClose}
                             className="w-full py-3 rounded-xl font-semibold text-slate-500 hover:bg-slate-100 transition-all"
                         >
-                            Cancelar
+                            {t('common.cancel')}
                         </button>
                     </div>
                 </div>

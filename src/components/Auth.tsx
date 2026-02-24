@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Mail, Lock, LogIn, Eye, EyeOff, PlusCircle } from 'lucide-react';
+import { useSettings } from '../contexts/SettingsContext';
 
 export function Auth() {
+    const { t } = useSettings();
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -28,7 +30,7 @@ export function Auth() {
             if (view === 'register') {
                 const { error } = await supabase.auth.signUp({ email, password });
                 if (error) throw error;
-                setMessage({ type: 'success', text: '¡Registro exitoso! Revisa tu email para confirmar.' });
+                setMessage({ type: 'success', text: t('auth.registerSuccess') });
             } else if (view === 'login') {
                 const { error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) throw error;
@@ -37,11 +39,11 @@ export function Auth() {
                     redirectTo: window.location.origin
                 });
                 if (error) throw error;
-                setMessage({ type: 'success', text: 'Enlace enviado. Revisa tu correo.' });
+                setMessage({ type: 'success', text: t('auth.recoverySent') });
             } else if (view === 'updatePassword') {
                 const { error } = await supabase.auth.updateUser({ password });
                 if (error) throw error;
-                setMessage({ type: 'success', text: 'Contraseña actualizada correctamente.' });
+                setMessage({ type: 'success', text: t('auth.passwordUpdated') });
                 setTimeout(() => setView('login'), 2000);
             }
         } catch (error: any) {
@@ -60,10 +62,10 @@ export function Auth() {
             <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 space-y-8">
                 <div className="text-center space-y-2">
                     <h1 className="text-3xl font-bold text-slate-950">
-                        {isRegister ? 'Crear cuenta' : isRecovery ? 'Recuperar acceso' : isUpdate ? 'Nueva contraseña' : '¡Bienvenido!'}
+                        {isRegister ? t('auth.createAccount') : isRecovery ? t('auth.recoverAccess') : isUpdate ? t('auth.newPassword') : t('auth.welcome')}
                     </h1>
                     <p className="text-slate-500">
-                        {isRegister ? 'Únete para gestionar gastos compartidos' : isRecovery ? 'Te enviaremos un enlace de reinicio' : isUpdate ? 'Ingresa tu nueva contraseña' : 'Inicia sesión para continuar'}
+                        {isRegister ? t('auth.registerSubtitle') : isRecovery ? t('auth.recoverySubtitle') : isUpdate ? t('auth.updateSubtitle') : t('auth.loginSubtitle')}
                     </p>
                 </div>
 
@@ -77,14 +79,14 @@ export function Auth() {
                 <form onSubmit={handleAuth} className="space-y-6">
                     {!isUpdate && (
                         <div className="space-y-2">
-                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Email</label>
+                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">{t('common.email')}</label>
                             <div className="relative">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                                 <input
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="tu@email.com"
+                                    placeholder={t('auth.emailPlaceholder')}
                                     className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-slate-950 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all"
                                     required
                                 />
@@ -95,7 +97,7 @@ export function Auth() {
                     {!isRecovery && (
                         <div className="space-y-2">
                             <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-                                {isUpdate ? 'Nueva contraseña' : 'Contraseña'}
+                                {isUpdate ? t('auth.newPassword') : t('common.password')}
                             </label>
                             <div className="relative">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -125,7 +127,7 @@ export function Auth() {
                                 onClick={() => setView('recovery')}
                                 className="text-xs font-medium text-primary-600 hover:text-primary-700"
                             >
-                                ¿Olvidaste tu contraseña?
+                                {t('auth.forgotPassword')}
                             </button>
                         </div>
                     )}
@@ -140,7 +142,7 @@ export function Auth() {
                         ) : (
                             <>
                                 {isRegister ? <PlusCircle className="w-5 h-5" /> : isRecovery ? <Mail className="w-5 h-5" /> : <LogIn className="w-5 h-5" />}
-                                {isRegister ? 'Registrarse' : isRecovery ? 'Enviar enlace' : isUpdate ? 'Actualizar contraseña' : 'Entrar'}
+                                {isRegister ? t('auth.registerAction') : isRecovery ? t('auth.sendLink') : isUpdate ? t('auth.updatePasswordAction') : t('auth.loginAction')}
                             </>
                         )}
                     </button>
@@ -155,7 +157,7 @@ export function Auth() {
                         }}
                         className="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors"
                     >
-                        {isRegister ? '¿Ya tienes cuenta? Inicia sesión' : isRecovery || isUpdate ? 'Ir al inicio de sesión' : '¿No tienes cuenta? Registrate gratis'}
+                        {isRegister ? t('auth.toggleLogin') : isRecovery || isUpdate ? t('auth.toggleGoLogin') : t('auth.toggleRegister')}
                     </button>
                 </div>
             </div>

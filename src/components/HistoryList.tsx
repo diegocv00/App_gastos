@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { format, isToday, isYesterday, isSameDay } from 'date-fns';
-import { es } from 'date-fns/locale';
 import type { Expense } from '../hooks/useExpenses';
 import type { Contact } from '../hooks/useContacts';
 import { formatCurrency, cn, parseSafeISO } from '../lib/utils';
@@ -8,6 +7,7 @@ import { useSettings } from '../contexts/SettingsContext';
 import { ShoppingBag, Coffee, Car, Receipt, Music, CircleDollarSign, CalendarDays, Calendar, Edit2, Trash2, Wallet, X } from 'lucide-react';
 import { ExpenseEditModal } from './ExpenseEditModal';
 import { ConfirmModal } from './ConfirmModal';
+import { dateFormats, dateLocales } from '../lib/i18n';
 
 interface HistoryListProps {
     expenses: Expense[];
@@ -33,18 +33,19 @@ const ICONS: Record<string, React.ReactNode> = {
     bills: <Receipt className="w-4 h-4" />,
     shopping: <ShoppingBag className="w-4 h-4" />,
     other: <CircleDollarSign className="w-4 h-4" />,
+    income: <Wallet className="w-4 h-4 text-emerald-600" />,
     Ingreso: <Wallet className="w-4 h-4 text-emerald-600" />,
 };
 
-const CATEGORIES = [
-    { id: 'all', label: 'Todos', icon: Calendar },
-    { id: 'food', label: 'Comida', icon: Coffee },
-    { id: 'transport', label: 'Transporte', icon: Car },
-    { id: 'entertainment', label: 'Diversión', icon: Music },
-    { id: 'bills', label: 'Servicios', icon: Receipt },
-    { id: 'shopping', label: 'Compras', icon: ShoppingBag },
-    { id: 'other', label: 'Otro', icon: CircleDollarSign },
-    { id: 'income', label: 'Ingresos', icon: Wallet },
+const CATEGORY_OPTIONS = [
+    { id: 'all', icon: Calendar },
+    { id: 'food', icon: Coffee },
+    { id: 'transport', icon: Car },
+    { id: 'entertainment', icon: Music },
+    { id: 'bills', icon: Receipt },
+    { id: 'shopping', icon: ShoppingBag },
+    { id: 'other', icon: CircleDollarSign },
+    { id: 'income', icon: Wallet },
 ];
 
 const COLORS: Record<string, string> = {
@@ -54,16 +55,8 @@ const COLORS: Record<string, string> = {
     bills: 'bg-red-500',
     shopping: 'bg-pink-500',
     other: 'bg-stone-500',
+    income: 'bg-emerald-500',
     Ingreso: 'bg-emerald-500',
-};
-
-const CATEGORY_LABELS: Record<string, string> = {
-    food: 'Comida',
-    transport: 'Transporte',
-    entertainment: 'Diversión',
-    bills: 'Servicios',
-    shopping: 'Compras',
-    other: 'Otro',
 };
 
 export function HistoryList({
@@ -79,10 +72,31 @@ export function HistoryList({
     onCategoryChange,
     onClearDate
 }: HistoryListProps) {
-    const { currency } = useSettings();
+    const { currency, language, t } = useSettings();
     const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
     const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
     const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null);
+    const locale = dateLocales[language];
+    const formats = dateFormats[language];
+
+    const categoryLabels: Record<string, string> = {
+        food: t('category.food'),
+        transport: t('category.transport'),
+        entertainment: t('category.entertainment'),
+        bills: t('category.bills'),
+        shopping: t('category.shopping'),
+        other: t('category.other'),
+        Ingreso: t('category.income'),
+    };
+
+    const categories = CATEGORY_OPTIONS.map((cat) => ({
+        ...cat,
+        label: cat.id === 'all'
+            ? t('category.all')
+            : cat.id === 'income'
+                ? t('category.incomePlural')
+                : categoryLabels[cat.id] || cat.id
+    }));
 
     const getContactName = (contactId?: string) => {
         if (!contactId) return null;
@@ -143,17 +157,17 @@ export function HistoryList({
                 <div className="px-6 pt-2">
                     <div className="flex p-1 bg-slate-100 rounded-xl">
                         <button onClick={() => onViewModeChange('daily')} className={cn("flex-1 py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-2", viewMode === 'daily' ? "bg-white text-slate-950 shadow-sm" : "text-slate-500 hover:text-slate-700")}>
-                            <CalendarDays className="w-3 h-3" /> Por día
+                            <CalendarDays className="w-3 h-3" /> {t('history.byDay')}
                         </button>
                         <button onClick={() => onViewModeChange('monthly')} className={cn("flex-1 py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-2", viewMode === 'monthly' ? "bg-white text-slate-950 shadow-sm" : "text-slate-500 hover:text-slate-700")}>
-                            <Calendar className="w-3 h-3" /> Por mes
+                            <Calendar className="w-3 h-3" /> {t('history.byMonth')}
                         </button>
                     </div>
                 </div>
 
                 <div className="px-6 overflow-x-auto scrollbar-hide">
                     <div className="flex gap-2 pb-2">
-                        {CATEGORIES.map(cat => (
+                        {categories.map(cat => (
                             <button
                                 key={cat.id}
                                 onClick={() => onCategoryChange(cat.id)}
@@ -175,7 +189,7 @@ export function HistoryList({
                     <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Receipt className="w-8 h-8 opacity-20" />
                     </div>
-                    <p className="text-sm">Aún no hay registros</p>
+                    <p className="text-sm">{t('history.noRecords')}</p>
                 </div>
             </div>
         );
@@ -193,7 +207,7 @@ export function HistoryList({
                         )}
                     >
                         <CalendarDays className="w-3 h-3" />
-                        Por día
+                        {t('history.byDay')}
                     </button>
                     <button
                         onClick={() => onViewModeChange('monthly')}
@@ -203,14 +217,14 @@ export function HistoryList({
                         )}
                     >
                         <Calendar className="w-3 h-3" />
-                        Por mes
+                        {t('history.byMonth')}
                     </button>
                 </div>
             </div>
 
             <div className="px-6 overflow-x-auto scrollbar-hide">
                 <div className="flex gap-2 pb-2">
-                    {CATEGORIES.map(cat => (
+                    {categories.map(cat => (
                         <button
                             key={cat.id}
                             onClick={() => onCategoryChange(cat.id)}
@@ -236,12 +250,12 @@ export function HistoryList({
                                 <span className="font-bold text-slate-700">
                                     {viewMode === 'daily' ? (
                                         isToday(parseSafeISO(group.date))
-                                            ? 'Hoy'
+                                            ? t('common.today')
                                             : isYesterday(parseSafeISO(group.date))
-                                                ? 'Ayer'
-                                                : format(parseSafeISO(group.date), "d 'de' MMMM", { locale: es })
+                                                ? t('common.yesterday')
+                                                : format(parseSafeISO(group.date), formats.dayMonthLong, { locale })
                                     ) : (
-                                        format(parseSafeISO(group.date), 'MMMM yyyy', { locale: es })
+                                        format(parseSafeISO(group.date), formats.monthYear, { locale })
                                     )}
                                 </span>
                                 {selectedDate && onClearDate && (
@@ -253,7 +267,7 @@ export function HistoryList({
                                         className="flex items-center gap-1 px-2 py-1 bg-slate-200 hover:bg-slate-300 rounded-full text-[10px] font-bold text-slate-600 transition-colors uppercase tracking-wider"
                                     >
                                         <X className="w-3 h-3" />
-                                        Ver todos
+                                        {t('common.viewAll')}
                                     </button>
                                 )}
                             </div>
@@ -284,16 +298,16 @@ export function HistoryList({
                                                 "bg-opacity-10"
                                             )}>
                                                 <div className={cn("text-current", expense.type === 'income' ? "text-emerald-600" : "")}>
-                                                    {expense.type === 'income' ? ICONS['Ingreso'] : (ICONS[expense.category] || ICONS['other'])}
+                                                    {expense.type === 'income' ? ICONS['income'] : (ICONS[expense.category] || ICONS['other'])}
                                                 </div>
                                             </div>
                                             <div>
                                                 <p className="font-medium text-slate-900">
-                                                    {expense.type === 'income' ? 'Ingreso' : (CATEGORY_LABELS[expense.category] || expense.category)}
+                                                    {expense.type === 'income' ? t('category.income') : (categoryLabels[expense.category] || expense.category)}
                                                 </p>
                                                 <div className="flex items-center gap-2 text-xs text-slate-500">
                                                     {viewMode === 'monthly' && (
-                                                        <span className="font-medium text-slate-600">{format(parseSafeISO(expense.date), "d 'de' MMM", { locale: es })}: </span>
+                                                        <span className="font-medium text-slate-600">{format(parseSafeISO(expense.date), formats.dayMonthShort, { locale })}: </span>
                                                     )}
                                                     <span className="max-w-[120px] truncate">{expense.description}</span>
                                                     {expense.isGroup && (expense.contactId || expense.shared_with_user_id) && (
@@ -353,8 +367,8 @@ export function HistoryList({
                     }
                     setExpenseToDelete(null);
                 }}
-                title="¿Eliminar registro?"
-                message="Este registro se borrará permanentemente de tu historial."
+                title={t('history.deleteTitle')}
+                message={t('history.deleteMessage')}
             />
 
             {editingExpense && (

@@ -36,7 +36,7 @@ function App() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [myProfile, setMyProfile] = useState<any>(null);
-  const { currency, setCurrency, convertFromBase } = useSettings();
+  const { currency, setCurrency, convertFromBase, language, setLanguage, t } = useSettings();
 
   useEffect(() => {
     if (user) {
@@ -44,6 +44,11 @@ function App() {
         .then(({ data }) => { if (data) setMyProfile(data); });
     }
   }, [user]);
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.title = t('app.title');
+  }, [language, t]);
 
   // Cálculos
   const totalExpenses = convertFromBase(expenses.reduce((acc, curr) => acc + curr.amount, 0));
@@ -60,9 +65,9 @@ function App() {
     ...(funds || []).map(f => ({
       id: f.id,
       amount: f.amount,
-      category: 'Ingreso',
+      category: 'income',
       date: f.created_at ? f.created_at.substring(0, 10) : new Date().toISOString().substring(0, 10), // Use substring to avoid TZ shift
-      description: f.description || 'Ingreso',
+      description: f.description || t('common.income'),
       type: 'income' as const,
       user_id: f.user_id
     }))
@@ -108,14 +113,14 @@ function App() {
     }
   };
 
-  if (authLoading) return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
+  if (authLoading) return <div className="min-h-screen flex items-center justify-center">{t('common.loading')}</div>;
   if (!user) return <Auth />;
 
   return (
     <MobileLayout className="flex flex-col">
       <header className="px-6 pt-12 pb-6 flex justify-between items-center bg-background/80 backdrop-blur-md sticky top-0 z-20 border-b border-slate-200">
         <div className="flex items-center gap-4">
-          <div><h1 className="text-2xl font-bold text-slate-950">Mis gastos</h1></div>
+          <div><h1 className="text-2xl font-bold text-slate-950">{t('app.title')}</h1></div>
           <div className="flex items-center gap-2">
             <button onClick={() => { setShowNotifications(true); refreshNotifications(); }} className="relative p-2 text-slate-400">
               <Bell className="w-6 h-6" />
@@ -129,10 +134,8 @@ function App() {
               </button>
               {showSettings && (
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in zoom-in-95 origin-top-right">
-
-                  {/* 2. MODIFICAMOS ESTE DIV PARA INCLUIR EL BOTÓN DE CERRAR */}
                   <div className="px-4 py-2 border-b border-slate-100 mb-1 flex justify-between items-center">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Moneda</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t('settings.title')}</p>
                     <button
                       onClick={() => setShowSettings(false)}
                       className="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-full transition-colors"
@@ -141,11 +144,21 @@ function App() {
                     </button>
                   </div>
 
-                  <button onClick={() => { setCurrency('COP'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'COP' && "text-primary-600 font-bold")}>Peso colombiano (COP)</button>
-                  <button onClick={() => { setCurrency('AUD'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'AUD' && "text-primary-600 font-bold")}>Dólar australiano (AUD)</button>
-                  <button onClick={() => { setCurrency('USD'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'USD' && "text-primary-600 font-bold")}>Dólar estadounidense (USD)</button>
-                  <button onClick={() => { setCurrency('EUR'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'EUR' && "text-primary-600 font-bold")}>Euro (EUR)</button>
-                  <button onClick={() => { setCurrency('CAD'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'CAD' && "text-primary-600 font-bold")}>Dólar canadiense (CAD)</button>
+                  <div className="px-4 py-2">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t('settings.languageSection')}</p>
+                  </div>
+                  <button onClick={() => { setLanguage('es'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", language === 'es' && "text-primary-600 font-bold")}>{t('settings.languageSpanish')}</button>
+                  <button onClick={() => { setLanguage('en'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", language === 'en' && "text-primary-600 font-bold")}>{t('settings.languageEnglish')}</button>
+
+                  <div className="px-4 py-2 border-t border-slate-100 mt-1">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t('settings.currencySection')}</p>
+                  </div>
+
+                  <button onClick={() => { setCurrency('COP'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'COP' && "text-primary-600 font-bold")}>{t('currency.COP')}</button>
+                  <button onClick={() => { setCurrency('AUD'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'AUD' && "text-primary-600 font-bold")}>{t('currency.AUD')}</button>
+                  <button onClick={() => { setCurrency('USD'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'USD' && "text-primary-600 font-bold")}>{t('currency.USD')}</button>
+                  <button onClick={() => { setCurrency('EUR'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'EUR' && "text-primary-600 font-bold")}>{t('currency.EUR')}</button>
+                  <button onClick={() => { setCurrency('CAD'); setShowSettings(false); }} className={cn("w-full px-4 py-3 text-left text-sm hover:bg-slate-50", currency === 'CAD' && "text-primary-600 font-bold")}>{t('currency.CAD')}</button>
                 </div>
               )}
             </div>
@@ -205,10 +218,10 @@ function App() {
       {showNotifications && <NotificationsModal userId={user.id} onClose={() => setShowNotifications(false)} />}
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-200 p-2 flex justify-around pb-safe z-30 max-w-md mx-auto">
-        <button onClick={() => setActiveTab('add')} className={cn("flex flex-col items-center justify-center w-16 py-1 rounded-xl transition-all", activeTab === 'add' ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:bg-slate-50")}><ReceiptText className="w-6 h-6 mb-1" /><span className="text-[10px] font-medium">Gastos</span></button>
-        <button onClick={() => setActiveTab('funds')} className={cn("flex flex-col items-center justify-center w-16 py-1 rounded-xl transition-all", activeTab === 'funds' ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:bg-slate-50")}><Wallet className="w-6 h-6 mb-1" /><span className="text-[10px] font-medium">Fondos</span></button>
-        <button onClick={() => setActiveTab('history')} className={cn("flex flex-col items-center justify-center w-16 py-1 rounded-xl transition-all", activeTab === 'history' ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:bg-slate-50")}><History className="w-6 h-6 mb-1" /><span className="text-[10px] font-medium">Historial</span></button>
-        <button onClick={() => setActiveTab('contacts')} className={cn("flex flex-col items-center justify-center w-16 py-1 rounded-xl transition-all", activeTab === 'contacts' ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:bg-slate-50")}><Users className="w-6 h-6 mb-1" /><span className="text-[10px] font-medium">Contactos</span></button>
+        <button onClick={() => setActiveTab('add')} className={cn("flex flex-col items-center justify-center w-16 py-1 rounded-xl transition-all", activeTab === 'add' ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:bg-slate-50")}><ReceiptText className="w-6 h-6 mb-1" /><span className="text-[10px] font-medium">{t('nav.expenses')}</span></button>
+        <button onClick={() => setActiveTab('funds')} className={cn("flex flex-col items-center justify-center w-16 py-1 rounded-xl transition-all", activeTab === 'funds' ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:bg-slate-50")}><Wallet className="w-6 h-6 mb-1" /><span className="text-[10px] font-medium">{t('nav.funds')}</span></button>
+        <button onClick={() => setActiveTab('history')} className={cn("flex flex-col items-center justify-center w-16 py-1 rounded-xl transition-all", activeTab === 'history' ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:bg-slate-50")}><History className="w-6 h-6 mb-1" /><span className="text-[10px] font-medium">{t('nav.history')}</span></button>
+        <button onClick={() => setActiveTab('contacts')} className={cn("flex flex-col items-center justify-center w-16 py-1 rounded-xl transition-all", activeTab === 'contacts' ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:bg-slate-50")}><Users className="w-6 h-6 mb-1" /><span className="text-[10px] font-medium">{t('nav.contacts')}</span></button>
       </nav>
     </MobileLayout>
   );

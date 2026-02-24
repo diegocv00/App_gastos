@@ -11,24 +11,38 @@ interface ExpenseFormProps {
     contacts: Contact[];
 }
 
-const CATEGORIES = [
-    { id: 'food', label: 'Comida', icon: Coffee },
-    { id: 'transport', label: 'Transporte', icon: Car },
-    { id: 'entertainment', label: 'Diversión', icon: Music },
-    { id: 'bills', label: 'Servicios', icon: Receipt },
-    { id: 'shopping', label: 'Compras', icon: ShoppingBag },
-    { id: 'other', label: 'Otro', icon: CircleDollarSign },
+const CATEGORY_OPTIONS = [
+    { id: 'food', icon: Coffee },
+    { id: 'transport', icon: Car },
+    { id: 'entertainment', icon: Music },
+    { id: 'bills', icon: Receipt },
+    { id: 'shopping', icon: ShoppingBag },
+    { id: 'other', icon: CircleDollarSign },
 ];
 
 export function ExpenseForm({ onAdd, contacts }: ExpenseFormProps) {
-    const { currency, convertToBase } = useSettings();
+    const { currency, convertToBase, t } = useSettings();
     const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [amount, setAmount] = useState('');
-    const [category, setCategory] = useState(CATEGORIES[0].id);
+    const [category, setCategory] = useState(CATEGORY_OPTIONS[0].id);
     const [description, setDescription] = useState('');
     const [isGroup, setIsGroup] = useState(false);
     const [selectedContactId, setSelectedContactId] = useState<string>('');
     const [splitPercentage, setSplitPercentage] = useState(50);
+
+    const categoryLabels: Record<string, string> = {
+        food: t('category.food'),
+        transport: t('category.transport'),
+        entertainment: t('category.entertainment'),
+        bills: t('category.bills'),
+        shopping: t('category.shopping'),
+        other: t('category.other'),
+    };
+
+    const categories = CATEGORY_OPTIONS.map((cat) => ({
+        ...cat,
+        label: categoryLabels[cat.id] || cat.id
+    }));
 
 
 
@@ -72,7 +86,7 @@ export function ExpenseForm({ onAdd, contacts }: ExpenseFormProps) {
             // Calculamos solo TU parte para guardarla como monto principal
             finalAmount = Math.round(numericAmount * (mySharePercent / 100));
 
-            const splitNote = `(Total: ${amount} | División: ${mySharePercent}%/${theirSharePercent}%)`;
+            const splitNote = `(${t('expenseForm.splitTotal')}: ${amount} | ${t('expenseForm.splitDivision')}: ${mySharePercent}%/${theirSharePercent}%)`;
             finalDescription = description ? `${description} ${splitNote}` : splitNote;
 
             // 2. LÓGICA DE NOTIFICACIÓN (LA CORRECCIÓN)
@@ -114,7 +128,7 @@ export function ExpenseForm({ onAdd, contacts }: ExpenseFormProps) {
         <form onSubmit={handleSubmit} className="space-y-7 px-6 pt-5 pb-20">
 
             <div className="space-y-1.5">
-                <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Monto</label>
+                <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">{t('common.amount')}</label>
                 <div className="relative group">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl font-light text-slate-400 group-focus-within:text-slate-900 transition-colors">
                         $
@@ -133,26 +147,26 @@ export function ExpenseForm({ onAdd, contacts }: ExpenseFormProps) {
 
             <div className="grid grid-cols-2 gap-4 items-end">
                 <CustomDatePicker
-                    label="Fecha"
+                    label={t('common.date')}
                     value={date}
                     onChange={setDate}
                 />
                 <div className="space-y-1.5">
-                    <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider block">Nota</label>
+                    <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider block">{t('common.note')}</label>
                     <input
                         type="text"
                         value={description}
                         onChange={e => setDescription(e.target.value)}
-                        placeholder="¿En qué?"
+                        placeholder={t('expenseForm.notePlaceholder')}
                         className="w-full bg-white border border-slate-200 rounded-xl py-3 px-3 text-xs text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all shadow-sm h-[42px]"
                     />
                 </div>
             </div>
 
             <div className="space-y-2">
-                <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Categoría</label>
+                <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">{t('common.category')}</label>
                 <div className="grid grid-cols-3 gap-x-2 gap-y-4">
-                    {CATEGORIES.map(cat => (
+                    {categories.map(cat => (
                         <button
                             key={cat.id}
                             type="button"
@@ -188,7 +202,7 @@ export function ExpenseForm({ onAdd, contacts }: ExpenseFormProps) {
                     <div className="flex items-center gap-2">
                         <Users className={cn("w-4 h-4", isGroup ? "text-purple-600" : "text-slate-400")} />
                         <div className="text-left">
-                            <p className="font-medium text-xs">Gasto grupal</p>
+                            <p className="font-medium text-xs">{t('expenseForm.groupExpense')}</p>
                         </div>
                     </div>
                     <div className={cn(
@@ -206,10 +220,10 @@ export function ExpenseForm({ onAdd, contacts }: ExpenseFormProps) {
                     <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200 bg-purple-50/50 p-3 rounded-xl border border-purple-100">
                         <div className="space-y-1">
                             <label className="text-[9px] font-semibold text-purple-700 uppercase tracking-wider block">
-                                ¿Con quién?
+                                {t('expenseForm.withWhom')}
                             </label>
                             {contacts.length === 0 ? (
-                                <p className="text-[10px] text-purple-600 text-center">No hay contactos</p>
+                                <p className="text-[10px] text-purple-600 text-center">{t('expenseForm.noContacts')}</p>
                             ) : (
                                 <select
                                     value={selectedContactId}
@@ -217,7 +231,7 @@ export function ExpenseForm({ onAdd, contacts }: ExpenseFormProps) {
                                     className="w-full bg-white border border-purple-200 rounded-lg py-2 px-3 text-xs text-slate-900 transition-all shadow-sm appearance-none font-medium text-center"
                                     required={isGroup}
                                 >
-                                    <option value="">Selecciona</option>
+                                    <option value="">{t('common.select')}</option>
                                     {contacts.map(contact => (
                                         <option key={contact.id} value={contact.id}>
                                             {contact.name}
@@ -230,8 +244,8 @@ export function ExpenseForm({ onAdd, contacts }: ExpenseFormProps) {
                         {selectedContactId && (
                             <div className="space-y-3 pt-1 border-t border-purple-100">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-[10px] font-bold text-purple-700">Tú: {splitPercentage}%</span>
-                                    <span className="text-[10px] font-bold text-slate-500">Ellos: {100 - splitPercentage}%</span>
+                                    <span className="text-[10px] font-bold text-purple-700">{t('common.you')}: {splitPercentage}%</span>
+                                    <span className="text-[10px] font-bold text-slate-500">{t('common.them')}: {100 - splitPercentage}%</span>
                                 </div>
 
                                 <input
@@ -265,7 +279,7 @@ export function ExpenseForm({ onAdd, contacts }: ExpenseFormProps) {
                 className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-primary-900/10 disabled:shadow-none mt-2"
             >
                 <Plus className="w-4 h-4" />
-                Agregar gasto
+                {t('expenseForm.addExpense')}
             </button>
         </form>
     );

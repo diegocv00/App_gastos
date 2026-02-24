@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
+import { DEFAULT_LANGUAGE, type Language, type TranslationKey, translations } from '../lib/i18n';
 
 type Currency = 'COP' | 'AUD' | 'USD' | 'EUR' | 'CAD';
 
@@ -7,6 +8,9 @@ interface SettingsContextType {
     setCurrency: (currency: Currency) => void;
     convertFromBase: (amount: number) => number;
     convertToBase: (amount: number) => number;
+    language: Language;
+    setLanguage: (language: Language) => void;
+    t: (key: TranslationKey) => string;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -24,11 +28,25 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const [currency, setCurrencyState] = useState<Currency>(() => {
         return (localStorage.getItem('currency') as Currency) || 'COP';
     });
+    const [language, setLanguageState] = useState<Language>(() => {
+        const stored = localStorage.getItem('language');
+        if (stored === 'es' || stored === 'en') return stored;
+        return DEFAULT_LANGUAGE;
+    });
 
     const setCurrency = (newCurrency: Currency) => {
         setCurrencyState(newCurrency);
         localStorage.setItem('currency', newCurrency);
     };
+
+    const setLanguage = (newLanguage: Language) => {
+        setLanguageState(newLanguage);
+        localStorage.setItem('language', newLanguage);
+    };
+
+    const t = useCallback((key: TranslationKey) => {
+        return translations[language][key] || translations[DEFAULT_LANGUAGE][key] || key;
+    }, [language]);
 
     const convertFromBase = (amount: number) => {
         if (currency === 'COP') return amount;
@@ -41,7 +59,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <SettingsContext.Provider value={{ currency, setCurrency, convertFromBase, convertToBase }}>
+        <SettingsContext.Provider value={{ currency, setCurrency, convertFromBase, convertToBase, language, setLanguage, t }}>
             {children}
         </SettingsContext.Provider>
     );

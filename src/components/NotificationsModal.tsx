@@ -1,5 +1,6 @@
 import { X, Check, UserPlus, Receipt, XCircle } from 'lucide-react';
 import { useNotifications } from '../hooks/useNotifications';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface Props {
     userId: string;
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export function NotificationsModal({ userId, onClose }: Props) {
+    const { t } = useSettings();
     const { notifications, loading, handleContactRequest, handleExpenseRequest } = useNotifications(userId);
 
     return (
@@ -16,8 +18,8 @@ export function NotificationsModal({ userId, onClose }: Props) {
                 {/* Header */}
                 <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                     <div>
-                        <h2 className="text-xl font-bold text-slate-900">Notificaciones</h2>
-                        <p className="text-xs text-slate-500 mt-0.5">Solicitudes pendientes</p>
+                        <h2 className="text-xl font-bold text-slate-900">{t('notifications.title')}</h2>
+                        <p className="text-xs text-slate-500 mt-0.5">{t('notifications.subtitle')}</p>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
                         <X className="w-6 h-6 text-slate-500" />
@@ -33,8 +35,8 @@ export function NotificationsModal({ userId, onClose }: Props) {
                             <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
                                 <Check className="w-8 h-8 text-slate-400" />
                             </div>
-                            <p className="text-slate-500 font-medium">Estás al día</p>
-                            <p className="text-xs text-slate-400">No tienes solicitudes pendientes</p>
+                            <p className="text-slate-500 font-medium">{t('notifications.upToDate')}</p>
+                            <p className="text-xs text-slate-400">{t('notifications.noPending')}</p>
                         </div>
                     ) : (
                         notifications.map((notif) => (
@@ -76,7 +78,7 @@ export function NotificationsModal({ userId, onClose }: Props) {
                                                 }
                                                 className="flex-1 bg-primary-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-primary-700 active:scale-95 transition-all flex items-center justify-center gap-2"
                                             >
-                                                <Check className="w-4 h-4" /> Aceptar
+                                                <Check className="w-4 h-4" /> {t('notifications.accept')}
                                             </button>
                                             <button
                                                 onClick={() => notif.type === 'contact_request'
@@ -85,7 +87,7 @@ export function NotificationsModal({ userId, onClose }: Props) {
                                                 }
                                                 className="flex-1 bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 active:scale-95 transition-all flex items-center justify-center gap-2"
                                             >
-                                                <XCircle className="w-4 h-4" /> Rechazar
+                                                <XCircle className="w-4 h-4" /> {t('notifications.reject')}
                                             </button>
                                         </div>
                                     </div>

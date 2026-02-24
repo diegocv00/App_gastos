@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Trash2, Copy, Search, User, ChevronDown, Eye, ChevronUp, ArrowRight, Edit2, X, Check } from 'lucide-react';
 import { cn } from '../lib/utils';
 import type { Contact } from '../hooks/useContacts';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface Props {
     contacts: Contact[];
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function ContactsList({ contacts, expenses, onDeleteContact, onSearchCode, onRequestContact, onUpdateContactName, myFriendCode }: Props) {
+    const { t } = useSettings();
     // Estados para añadir contacto
     const [showAddModal, setShowAddModal] = useState(false);
     const [friendCodeInput, setFriendCodeInput] = useState('');
@@ -41,7 +43,7 @@ export function ContactsList({ contacts, expenses, onDeleteContact, onSearchCode
             setFoundUser(user);
             setModalStep('confirm');
         } catch (e: any) {
-            alert(e.message || 'Usuario no encontrado');
+            alert(e.message || t('contacts.userNotFound'));
         } finally {
             setLoading(false);
         }
@@ -52,10 +54,10 @@ export function ContactsList({ contacts, expenses, onDeleteContact, onSearchCode
         setLoading(true);
         try {
             // Enviamos la solicitud con el nombre original del perfil
-            const success = await onRequestContact(foundUser.id, foundUser.full_name || 'Nuevo Amigo');
+            const success = await onRequestContact(foundUser.id, foundUser.full_name || t('contacts.newFriend'));
             if (success) {
                 resetModal();
-                alert('¡Solicitud enviada! Ahora espera a que te acepten.');
+                alert(t('contacts.requestSent'));
             }
         } finally {
             setLoading(false);
@@ -87,7 +89,7 @@ export function ContactsList({ contacts, expenses, onDeleteContact, onSearchCode
             <div className={cn("bg-primary-600 rounded-b-[2rem] shadow-lg mb-6 transition-all overflow-hidden", isHeaderExpanded ? "pt-4 pb-6 px-6" : "py-3 px-6")}>
                 <div onClick={() => setIsHeaderExpanded(!isHeaderExpanded)} className="flex justify-between items-center cursor-pointer text-white/90">
                     <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium uppercase tracking-wider">Mi Código</span>
+                        <span className="text-sm font-medium uppercase tracking-wider">{t('contacts.myCode')}</span>
                         {!isHeaderExpanded && <span className="text-xs bg-white/20 px-2 py-0.5 rounded text-white/80">{showCodeCharacters ? (myFriendCode || '....') : '••••••'}</span>}
                     </div>
                     {isHeaderExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
@@ -107,8 +109,8 @@ export function ContactsList({ contacts, expenses, onDeleteContact, onSearchCode
 
             {/* LISTA CONTACTOS */}
             <div className="px-6 mb-4 flex justify-between items-center">
-                <h3 className="font-bold text-slate-800 text-lg flex gap-2"><User className="w-5 h-5 text-primary-600" /> Mis contactos <span className="text-xs font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{activeContacts.length}</span></h3>
-                <button onClick={() => { resetModal(); setShowAddModal(true) }} className="flex gap-2 bg-primary-50 text-primary-600 px-4 py-2 rounded-full text-sm font-bold active:scale-95"><Plus className="w-4 h-4" /> Añadir</button>
+                <h3 className="font-bold text-slate-800 text-lg flex gap-2"><User className="w-5 h-5 text-primary-600" /> {t('contacts.myContacts')} <span className="text-xs font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{activeContacts.length}</span></h3>
+                <button onClick={() => { resetModal(); setShowAddModal(true) }} className="flex gap-2 bg-primary-50 text-primary-600 px-4 py-2 rounded-full text-sm font-bold active:scale-95"><Plus className="w-4 h-4" /> {t('contacts.addContact')}</button>
             </div>
 
             <div className="px-6 space-y-3">
@@ -134,7 +136,7 @@ export function ContactsList({ contacts, expenses, onDeleteContact, onSearchCode
                             ) : (
                                 <div>
                                     <h3 className="font-semibold text-slate-900">{contact.name}</h3>
-                                    <p className="text-xs text-slate-400">{expenses.filter((e) => e.contactId === contact.id || e.shared_with_user_id === contact.friend_id).length} transacciones</p>
+                                    <p className="text-xs text-slate-400">{expenses.filter((e) => e.contactId === contact.id || e.shared_with_user_id === contact.friend_id).length} {t('common.transactions')}</p>
                                 </div>
                             )}
                         </div>
@@ -159,17 +161,17 @@ export function ContactsList({ contacts, expenses, onDeleteContact, onSearchCode
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in">
                     <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl scale-100 animate-in zoom-in-95">
                         <div className="text-center mb-6">
-                            <h3 className="text-xl font-bold text-slate-900">{modalStep === 'search' ? 'Añadir Amigo' : 'Confirmar'}</h3>
-                            <p className="text-sm text-slate-500">{modalStep === 'search' ? 'Ingresa el código' : '¿Es esta la persona?'}</p>
+                            <h3 className="text-xl font-bold text-slate-900">{modalStep === 'search' ? t('contacts.addFriendTitle') : t('contacts.confirmTitle')}</h3>
+                            <p className="text-sm text-slate-500">{modalStep === 'search' ? t('contacts.enterCode') : t('contacts.isThisPerson')}</p>
                         </div>
 
                         {modalStep === 'search' && (
                             <div className="space-y-4">
                                 <div className="relative">
                                     <Search className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
-                                    <input type="text" className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl uppercase font-mono font-bold text-lg text-center tracking-widest outline-none focus:ring-2 focus:ring-primary-500/20" placeholder="Ej: A1B2C3" maxLength={6} value={friendCodeInput} onChange={(e) => setFriendCodeInput(e.target.value.toUpperCase())} />
+                                    <input type="text" className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl uppercase font-mono font-bold text-lg text-center tracking-widest outline-none focus:ring-2 focus:ring-primary-500/20" placeholder={t('contacts.codePlaceholder')} maxLength={6} value={friendCodeInput} onChange={(e) => setFriendCodeInput(e.target.value.toUpperCase())} />
                                 </div>
-                                <button onClick={handleSearch} disabled={loading || friendCodeInput.length < 6} className="w-full bg-primary-600 text-white py-3.5 rounded-xl font-bold disabled:opacity-50">{loading ? '...' : 'Buscar'}</button>
+                                <button onClick={handleSearch} disabled={loading || friendCodeInput.length < 6} className="w-full bg-primary-600 text-white py-3.5 rounded-xl font-bold disabled:opacity-50">{loading ? t('common.loadingDots') : t('common.search')}</button>
                             </div>
                         )}
 
@@ -182,10 +184,10 @@ export function ContactsList({ contacts, expenses, onDeleteContact, onSearchCode
                                         <p className="text-xs text-slate-500">{foundUser.email}</p>
                                     </div>
                                 </div>
-                                <button onClick={handleConfirmAdd} disabled={loading} className="w-full bg-primary-600 text-white py-3.5 rounded-xl font-bold flex justify-center gap-2">{loading ? 'Enviando...' : <>Enviar solicitud <ArrowRight className="w-4 h-4" /></>}</button>
+                                <button onClick={handleConfirmAdd} disabled={loading} className="w-full bg-primary-600 text-white py-3.5 rounded-xl font-bold flex justify-center gap-2">{loading ? t('contacts.sending') : <>{t('contacts.sendRequest')} <ArrowRight className="w-4 h-4" /></>}</button>
                             </div>
                         )}
-                        <button onClick={resetModal} className="w-full py-3 mt-2 text-slate-500 font-medium text-sm">Cancelar</button>
+                        <button onClick={resetModal} className="w-full py-3 mt-2 text-slate-500 font-medium text-sm">{t('common.cancel')}</button>
                     </div>
                 </div>
             )}

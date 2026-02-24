@@ -2,10 +2,10 @@ import { useMemo, useState } from 'react';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import type { Expense } from '../hooks/useExpenses';
 import { format, subDays, eachDayOfInterval, subWeeks, isSameDay, subMonths, eachMonthOfInterval } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { formatCurrency, cn, parseSafeISO } from '../lib/utils';
 import { useSettings } from '../contexts/SettingsContext';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { dateFormats, dateLocales } from '../lib/i18n';
 
 interface ExpenseChartProps {
     expenses: Expense[];
@@ -14,20 +14,11 @@ interface ExpenseChartProps {
     viewMode?: 'daily' | 'monthly';
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-    food: 'Comida',
-    transport: 'Transporte',
-    entertainment: 'Diversión',
-    bills: 'Servicios',
-    shopping: 'Compras',
-    other: 'Otro',
-    Ingreso: 'Fondo/Ingreso',
-};
-
-const CustomTooltip = ({ active, payload, label, currency }: any) => {
+const CustomTooltip = ({ active, payload, label, currency, categoryLabels, t }: any) => {
     if (active && payload && payload.length) {
         const data = payload[0].payload;
         const categories = data.categories as Record<string, number>;
+        const isIncomeCategory = (cat: string) => cat === 'income' || cat === 'Ingreso';
 
         return (
             <div className="bg-white border border-slate-200 p-3 rounded-xl shadow-xl min-w-[200px]">
@@ -35,14 +26,14 @@ const CustomTooltip = ({ active, payload, label, currency }: any) => {
                 <div className="space-y-1">
                     {Object.entries(categories).map(([cat, amount]) => (
                         <div key={cat} className="flex justify-between text-xs">
-                            <span className="capitalize text-slate-700">{CATEGORY_LABELS[cat] || cat}</span>
-                            <span className={cn("font-mono", cat === 'Ingreso' ? "text-emerald-600" : "text-primary-700")}>
-                                {cat === 'Ingreso' ? '+' : '-'}{formatCurrency(amount, currency)}
+                            <span className="capitalize text-slate-700">{categoryLabels[cat] || cat}</span>
+                            <span className={cn("font-mono", isIncomeCategory(cat) ? "text-emerald-600" : "text-primary-700")}>
+                                {isIncomeCategory(cat) ? '+' : '-'}{formatCurrency(amount, currency)}
                             </span>
                         </div>
                     ))}
                     <div className="border-t border-slate-100 mt-2 pt-2 flex justify-between text-xs font-bold text-slate-950">
-                        <span>Balance</span>
+                        <span>{t('chart.balance')}</span>
                         <span>{formatCurrency(payload.reduce((acc: number, p: any) => p.dataKey === 'income' ? acc + p.value : acc - p.value, 0), currency)}</span>
                     </div>
                 </div>
@@ -53,8 +44,21 @@ const CustomTooltip = ({ active, payload, label, currency }: any) => {
 };
 
 export function ExpenseChart({ expenses, selectedDate, onSelectDate, viewMode = 'daily' }: ExpenseChartProps) {
-    const { currency } = useSettings();
+    const { currency, language, t } = useSettings();
     const [offset, setOffset] = useState(0);
+    const locale = dateLocales[language];
+    const formats = dateFormats[language];
+
+    const categoryLabels: Record<string, string> = {
+        food: t('category.food'),
+        transport: t('category.transport'),
+        entertainment: t('category.entertainment'),
+        bills: t('category.bills'),
+        shopping: t('category.shopping'),
+        other: t('category.other'),
+        income: t('category.incomeFull'),
+        Ingreso: t('category.incomeFull'),
+    };
 
     const { data, dateRangeLabel } = useMemo(() => {
         const today = new Date();
@@ -64,8 +68,8 @@ export function ExpenseChart({ expenses, selectedDate, onSelectDate, viewMode = 
             const end = subWeeks(today, offset);
             const start = subDays(end, 6);
             const interval = eachDayOfInterval({ start, end });
-            const startStr = format(start, 'd MMM', { locale: es });
-            const endStr = format(end, 'd MMM', { locale: es });
+            const startStr = format(start, formats.rangeDayMonth, { locale });
+            const endStr = format(end, formats.rangeDayMonth, { locale });
 
             return {
                 dateRangeLabel: `${cap(startStr)} - ${cap(endStr)}`,
@@ -78,12 +82,12 @@ export function ExpenseChart({ expenses, selectedDate, onSelectDate, viewMode = 
                         acc[curr.category] = (acc[curr.category] || 0) + curr.amount;
                         return acc;
                     }, {} as Record<string, number>);
-                    const dayName = format(date, 'EEE', { locale: es });
+                    const dayName = format(date, 'EEE', { locale });
 
                     return {
                         date: dateStr,
                         day: cap(dayName),
-                        fullDate: format(date, 'd \'de\' MMMM', { locale: es }),
+                        fullDate: format(date, formats.dayMonthLong, { locale }),
                         amount: expenseTotal,
                         income: incomeTotal,
                         categories
@@ -94,8 +98,8 @@ export function ExpenseChart({ expenses, selectedDate, onSelectDate, viewMode = 
             const end = subMonths(today, offset * 6);
             const start = subMonths(end, 5);
             const interval = eachMonthOfInterval({ start, end });
-            const startStr = format(start, 'MMM yyyy', { locale: es });
-            const endStr = format(end, 'MMM yyyy', { locale: es });
+            const startStr = format(start, formats.rangeMonthYear, { locale });
+            const endStr = format(end, formats.rangeMonthYear, { locale });
 
             return {
                 dateRangeLabel: `${cap(startStr)} - ${cap(endStr)}`,
@@ -108,12 +112,12 @@ export function ExpenseChart({ expenses, selectedDate, onSelectDate, viewMode = 
                         acc[curr.category] = (acc[curr.category] || 0) + curr.amount;
                         return acc;
                     }, {} as Record<string, number>);
-                    const monthName = format(date, 'MMM', { locale: es });
+                    const monthName = format(date, 'MMM', { locale });
 
                     return {
                         date: monthKey,
                         day: cap(monthName),
-                        fullDate: format(date, 'MMMM yyyy', { locale: es }),
+                        fullDate: format(date, formats.monthYear, { locale }),
                         amount: expenseTotal,
                         income: incomeTotal,
                         categories
@@ -121,7 +125,7 @@ export function ExpenseChart({ expenses, selectedDate, onSelectDate, viewMode = 
                 })
             };
         }
-    }, [expenses, offset, viewMode]);
+    }, [expenses, offset, viewMode, language, formats, locale]);
 
     return (
         // Agregamos la clase 'chart-no-select' aquí
@@ -135,7 +139,7 @@ export function ExpenseChart({ expenses, selectedDate, onSelectDate, viewMode = 
                     <ChevronLeft className="w-4 h-4" />
                 </button>
                 <span className="text-xs font-semibold text-slate-900 uppercase tracking-widest">
-                    {offset === 0 ? (viewMode === 'daily' ? 'Últimos 7 días' : 'Últimos 6 meses') : dateRangeLabel}
+                    {offset === 0 ? (viewMode === 'daily' ? t('chart.last7Days') : t('chart.last6Months')) : dateRangeLabel}
                 </span>
                 <button
                     onClick={() => setOffset(prev => Math.max(0, prev - 1))}
@@ -168,7 +172,7 @@ export function ExpenseChart({ expenses, selectedDate, onSelectDate, viewMode = 
                             dy={10}
                         />
                         <Tooltip
-                            content={<CustomTooltip currency={currency} />}
+                            content={<CustomTooltip currency={currency} categoryLabels={categoryLabels} t={t} />}
                             cursor={{ fill: 'rgba(251, 195, 138, 0.2)' }}
                         />
                         <Bar dataKey="income" radius={[6, 6, 0, 0]} maxBarSize={20} stackId="a">

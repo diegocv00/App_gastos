@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { useSettings } from '../contexts/SettingsContext';
 
 export interface NotificationItem {
     uniqueId: string;
@@ -14,6 +15,7 @@ export interface NotificationItem {
 export function useNotifications(userId: string | undefined) {
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const { t, language } = useSettings();
 
     const fetchNotifications = async () => {
         if (!userId) {
@@ -54,7 +56,7 @@ export function useNotifications(userId: string | undefined) {
                     .in('id', Array.from(senderIds));
 
                 profiles?.forEach((p: any) => {
-                    namesMap[p.id] = p.full_name || p.email || 'Usuario Desconocido';
+                    namesMap[p.id] = p.full_name || p.email || t('notifications.unknownUser');
                 });
             }
 
@@ -63,8 +65,8 @@ export function useNotifications(userId: string | undefined) {
                 uniqueId: `contact-${c.id}`,
                 id: c.id,
                 type: 'contact_request' as const,
-                senderName: namesMap[c.user_id] || 'Alguien',
-                details: 'Quiere añadirte a sus contactos',
+                senderName: namesMap[c.user_id] || t('notifications.someone'),
+                details: t('notifications.contactRequestDetails'),
                 date: c.created_at
             }));
 
@@ -72,8 +74,8 @@ export function useNotifications(userId: string | undefined) {
                 uniqueId: `expense-${e.id}`,
                 id: e.id,
                 type: 'expense_request' as const,
-                senderName: namesMap[e.user_id] || 'Tu contacto',
-                details: e.description || 'Gasto compartido',
+                senderName: namesMap[e.user_id] || t('notifications.yourContact'),
+                details: e.description || t('notifications.sharedExpense'),
                 amount: e.amount,
                 date: e.created_at
             }));
@@ -115,7 +117,7 @@ export function useNotifications(userId: string | undefined) {
                     await supabase.from('contacts').insert({
                         user_id: userId,
                         friend_id: req.user_id,
-                        name: req.name || 'Nuevo Amigo',
+                        name: req.name || t('contacts.newFriend'),
                         status: 'accepted',
                         is_sender: false
                     });
@@ -135,7 +137,7 @@ export function useNotifications(userId: string | undefined) {
             .subscribe();
 
         return () => { sub.unsubscribe(); };
-    }, [userId]);
+    }, [userId, language]);
 
     return {
         notifications,

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAdMob } from './useAdMob';
+import { useSettings } from '../contexts/SettingsContext';
 
 export interface Expense {
     id: string;
@@ -20,6 +21,7 @@ export function useExpenses(userId: string | undefined) {
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [loading, setLoading] = useState(true);
     const { showInterstitial } = useAdMob();
+    const { t } = useSettings();
 
     const fetchExpenses = async () => {
         if (!userId) {
@@ -72,12 +74,12 @@ export function useExpenses(userId: string | undefined) {
         if (error) {
             console.error('Error adding expense:', error);
             // Si el error es Foreign Key, es porque el ID del amigo no existe en perfiles
-            alert('❌ Error al guardar: ' + error.message);
+            alert(`${t('errors.saveFailed')}: ${error.message}`);
         } else {
             if (isShared) {
-                alert('📤 Solicitud de gasto enviada al contacto.');
+                alert(t('alerts.expenseRequestSent'));
             } else {
-                alert('✅ Gasto guardado.');
+                alert(t('alerts.expenseSaved'));
             }
             showInterstitial();
             await fetchExpenses();
