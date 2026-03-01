@@ -252,7 +252,7 @@ export function ExpenseForm({ onAdd, contacts }: ExpenseFormProps) {
                                     type="range"
                                     min="0"
                                     max="100"
-                                    step="5"
+                                    step="1"
                                     value={splitPercentage}
                                     onChange={(e) => setSplitPercentage(parseInt(e.target.value))}
                                     className="w-full h-1.5 bg-purple-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
